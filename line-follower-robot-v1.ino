@@ -1,54 +1,77 @@
-# Line Follower Robot Using Arduino
+   ////////////////////////////////////////////////////////
+  //                LinoBot v1.0                        //             
+ //               By Aarav Garg                        //
+////////////////////////////////////////////////////////
 
-Welcome to the guide on creating a Line Follower Robot using Arduino! In this instructable, you'll learn how to build a robot that follows a line using infrared proximity sensors. The Arduino microcontroller will process sensor input and control the motors through a motor shield.
+//I have added the possibilities of testing
+//The values of analogRead could be changed for trouble shooting
 
-## Table of Contents
-- [Introduction](#introduction)
-- [The Working](#the-working)
-- [Parts Required](#parts-required)
-- [Assemble the Chassis](#assemble-the-chassis)
-- [Main Connections](#main-connections)
-- [Arduino Code](#arduino-code)
+//including the libraries
+#include <AFMotor.h>
 
-## Introduction
-In this instructable, we'll explore how the robot reacts to different sensor outcomes:
-- Case 1: No line detected - Both motors rotate forward, and the car moves forward.
-- Case 2: Left sensor detects the line - Car turns left.
-- Case 3: Right sensor detects the line - Car turns right.
-- Case 4: Both sensors detect the line - Car stops.
+//defining pins and variables
+#define lefts A4 
+#define rights A5 
 
-## The Working
-The robot uses two infrared proximity sensors placed at the front. Based on sensor input, the Arduino directs the motors using a motor shield, determining the robot's movement.
+//defining motors
+AF_DCMotor motor1(4, MOTOR12_8KHZ); 
+AF_DCMotor motor2(3, MOTOR12_8KHZ);
+/*
+AF_DCMotor motor1(3, MOTOR12_8KHZ); 
+AF_DCMotor motor2(4, MOTOR12_8KHZ);
+ */
 
-## Parts Required
-Gather the following components:
-- Chassis (including motors and wheels)
-- Arduino Uno R3
-- L293D Motor Shield
-- IR Proximity Sensors (pair)
-- Jumper Wires
-- Switch
-- 4AA Battery Holder
+void setup() {
+  //setting the speed of motors
+  motor1.setSpeed(200);
+  motor2.setSpeed(200);
+  //declaring pin types
+  pinMode(lefts,INPUT);
+  pinMode(rights,INPUT);
+  //begin serial communication
+  Serial.begin(9600);
+  
+}
 
-**Tools required:**
-- Soldering Iron
-- Hot Glue Gun
-- Screw Driver
-
-## Assemble the Chassis
-1. Assemble your robot body according to your chassis. Refer to the instruction manual if provided.
-2. Attach Arduino, the motor shield, and the battery holder to the chassis.
-3. Attach proximity sensors at the front on either side, facing down, at the corners.
-4. Attach the switch.
-
-**Note:** Solder wires to the motors and the switch.
-
-## Main Connections
-Connect the components as follows:
-- Left Sensor to Arduino: Vcc - 5v, Gnd - Gnd, Out - A4
-- Right Sensor to Arduino: Vcc - 5v, Gnd - Gnd, Out - A5
-- Connect the motors to the motor shield and plug the motor shield onto the Arduino board.
-- Connect the battery holder to the shield through a switch.
-
-## Arduino Code
-Download the provided Arduino code file or write your own to program the robot.
+void loop(){
+  //printing values of the sensors to the serial monitor
+  Serial.println(analogRead(lefts));
+  Serial.println(analogRead(rights));
+  //line detected by both
+  if(analogRead(lefts)<=400 && analogRead(rights)<=400){
+    //stop
+    motor1.run(RELEASE);
+    motor2.run(RELEASE);
+  }
+  //line detected by left sensor
+  else if(analogRead(lefts)<=400 && !analogRead(rights)<=400){
+    //turn left
+    motor1.run(BACKWARD);
+    motor2.run(FORWARD);
+    /*
+    motor1.run(RELEASE);
+    motor2.run(FORWARD);
+     */
+  }
+  //line detected by right sensor
+  else if(!analogRead(lefts)<=400 && analogRead(rights)<=400){
+    //turn right
+    motor1.run(FORWARD);
+    motor2.run(BACKWARD);
+    /*
+    motor1.run(FORWARD);
+    motor2.run(RELEASE);
+     */
+  }
+  //line detected by none
+  else if(!analogRead(lefts)<=400 && !analogRead(rights)<=400){
+    //stop
+    motor1.run(FORWARD);
+    motor2.run(FORWARD);
+    /*
+    motor1.run(BACKWARD);
+    motor2.run(BACKWARD);
+     */
+  }
+  
+}
